@@ -1,0 +1,212 @@
+openapi: 3.0.0
+info:
+  title: Trkr API
+  description: This is the API for the Trkr system,
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+tags:
+  - name: Transaction
+    description: Endpoints responsible for updating information about transaction information.
+paths:
+#  /data/vertex:
+#    get:
+#      tags:
+#        - Transaction
+#      summary:
+#        retrieve one or more vertices
+#      description: |
+#        retrieve 1 or more vertices matching the provided search criteria. All vertices will belong to the same label.
+#      operationId: getVertex
+#      parameters:
+#        - name: label
+#          required: true
+#          in: query
+#          description: label value for vertex
+#          schema:
+#            type: string
+#            example: Project
+#        - name: searchCriteria
+#          in: query
+#          description: a map of key-val pairs to use as search criteria on vertices
+#          schema:
+#            type: string
+#      responses:
+#        '200':
+#          description: result(s) matching the search criteria were found and returned
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/vertex'
+#        '204':
+#          description: provided search criteria were valid but did not match any results in the database.
+#          content:
+#            text/plain:
+#              schema:
+#                type: string
+#        '400':
+#          description: The provided search criteria were invalid.
+#          content:
+#            text/plain:
+#              schema:
+#                type: string
+#    post:
+#      tags:
+#        - TA1
+#      summary: insert a single new vertex
+#      description: |
+#        create a single vertex with the provided properties/values and insert into graph.
+#      operationId: insertVertex
+#      parameters:
+#        - name: label
+#          in: query
+#          description: label value for vertex
+#          required: true
+#          schema:
+#            type: string
+#            example: Person
+#      requestBody:
+#        description: json representing the key-val properties of the new vertex to add
+#        required: false
+#        content:
+#          application/json:
+#            schema:
+#              type: object
+#              additionalProperties:
+#                type: string
+#      responses:
+#        '201':
+#          description: the vertex was inserted successfully. Return the json-representation of the vertex.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/vertex'
+#        '400':
+#          description: the provided insert request was invalid. Return an error message pertaining to the failure.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/vertex'
+  /raw/citiTransactions:
+    post:
+      tags:
+        - Transaction
+      summary: insert a list of citi transactions
+      description: |
+        take a list of citi bank transactions and add them to the database
+      operationId: postCitiTransactions
+      requestBody:
+        description: json representing the list of new citiTransactions to add.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/citiTransactions'
+      responses:
+        '201':
+          description: the vertex was inserted successfully. Return the json-representation of the vertex.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: the provided insert request was invalid. Return an error message pertaining to the failure.
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:
+    citiTransaction:
+      type: object
+      properties:
+        date:
+          type: string
+        amount:
+          type: string
+        balance:
+          type: string
+        purchaseDate:
+          type: string
+        postedDate:
+          type: string
+        purchaseMethod:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+    citiTransactions:
+      type: object
+      properties:
+        transactionList:
+          type: array
+          items:
+            $ref: '#/components/schemas/citiTransaction'
+#    vertex:
+#      type: object
+#      required:
+#        - id
+#        - label
+#      properties:
+#        id:
+#          type: string
+#        propertiesMap:
+#          type: object
+#          additionalProperties:
+#            type: string
+#        label:
+#          type: string
+#          example: Person
+#        error:
+#          type: string
+#          example: error couldn't insert
+#    edge:
+#      type: object
+#      required:
+#        - id
+#        - parentVertexID
+#        - childVertexID
+#        - label
+#      properties:
+#        id:
+#          type: string
+#        parentVertexID:
+#          type: string
+#          example: 1001
+#        childVertexID:
+#          type: string
+#          example: 2001
+#        label:
+#          type: string
+#          example: precedes
+#        propertiesMap:
+#          type: object
+#          additionalProperties:
+#            type: string
+#    graph:
+#      type: object
+#      required:
+#        - vertexArray
+#      properties:
+#        vertexArray:
+#          type: array
+#          items:
+#            $ref: '#/components/schemas/vertex'
+#        edgeArray:
+#          type: array
+#          items:
+#            $ref: '#/components/schemas/edge'
+#    query:
+#      required:
+#        - queryString
+#      properties:
+#        queryString:
+#          type: string
+#          example: "CREATE (g:test2) SET g.message ='this works' RETURN g.message + ', from node' + id(g)"
+#      type: object

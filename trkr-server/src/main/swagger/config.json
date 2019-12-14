@@ -1,0 +1,8 @@
+{
+  "invokerPackage": "com.kage.trkr",
+  "apiPackage": "com.kage.trkr.api",
+  "modelPackage": "com.kage.trkr.model",
+  "sourceFolder": "",
+  "generateSupportingFiles": "false",
+  "interfaceOnly": true
+}

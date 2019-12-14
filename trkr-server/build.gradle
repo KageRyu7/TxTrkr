@@ -1,0 +1,165 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.2.0.M5'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'org.hidetake.swagger.generator' version '2.18.1'
+}
+
+defaultTasks 'clean', 'swaggerClean', 'generateSwaggerCode', 'generateSwaggerUI', 'build'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'checkstyle'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java',
+                       'src/generated/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources',
+                       'src/generated/resources']
+        }
+    }
+}
+
+dependencies {
+    //spring
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
+
+    //swagger
+    swaggerCodegen 'org.openapitools:openapi-generator-cli:3.3.4'
+    swaggerUI 'org.webjars:swagger-ui:3.10.0'
+    implementation "io.springfox:springfox-swagger2:2.9.2"
+    implementation("com.h2database:h2")
+
+    // Tinkerpop
+    implementation "org.apache.tinkerpop:gremlin-core:3.4.4"
+    implementation "org.apache.tinkerpop:gremlin-driver:3.4.4"
+    implementation "org.apache.tinkerpop:sparql-gremlin:3.4.4"
+    implementation "com.steelbridgelabs.oss:neo4j-gremlin-bolt:0.3.1"
+    implementation "com.orientechnologies:orientdb-gremlin:3.1.0-M3"
+    implementation("com.blazegraph:blazegraph-gremlin:1.0.0") {
+        exclude group: 'org.slf4j'
+    }
+    implementation "org.janusgraph:janusgraph-core:0.4.0"
+
+    //Testing
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.5.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.5.2")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.5.2")
+}
+
+task swaggerClean(type: Delete) {
+    doFirst {
+        delete 'src/generated'
+    }
+}
+clean.dependsOn(swaggerClean)
+
+swaggerSources {
+    moiraiClotho {
+        inputFile = file('src/main/swagger/openapi.yaml')
+        code {
+            language = 'spring'
+            components = ['models', 'apis']
+            outputDir = file('src/generated/java')
+            configFile = file('src/main/swagger/config.json')
+        }
+        ui {
+            outputDir = file('src/generated/resources/static/')
+        }
+    }
+}
+
+task buildDockerImage {
+    description 'Builds the Docker image.'
+    doLast {
+
+        // Initialize default values
+        String image_name = "$dockerImageName"
+        String image_tag = "$version"
+        Boolean tag_latest = project.hasProperty("tag-latest")
+
+        // Override values if parameters are populated
+        if (project.hasProperty("image_name")) {
+            image_name = project.getProperty("image_name")
+        }
+        if (project.hasProperty("tag")) {
+            image_tag = project.getProperty("tag")
+        }
+        if (project.hasProperty("tag-latest")) {
+            tag_latest = true
+        }
+        // Concatenate the name and tag
+        String image_name_and_tag = image_name + ":" + image_tag
+        String image_name_latest = image_name + ":latest"
+
+        exec {
+            if (project.hasProperty("no-cache")) {
+                commandLine 'docker', 'build', '--no-cache', '-t', image_name_and_tag, '.'
+            } else {
+                commandLine 'docker', 'build', '-t', image_name_and_tag, '.'
+            }
+        }
+        exec {
+            if (tag_latest) {
+                commandLine 'docker', 'tag', image_name_and_tag, image_name_latest
+            } else {
+                commandLine 'echo', 'nothing to do here'
+            }
+        }
+        exec {
+            // Cleans any dangling images from the build
+            // -f stand for force. Skips the prompt for confirmation
+            commandLine 'docker', 'system', 'prune', '-f'
+        }
+
+        // Test the docker image build correctly
+        if (project.hasProperty("skip-test")) {
+            println "Skipping Docker tests."
+        } else {
+            exec {
+                commandLine './runDockerTests.sh', image_name_and_tag
+            }
+        }
+    }
+}
+
+checkstyle {
+    configFile = file("${project.projectDir}/config/checkstyle/checkstyle.xml")
+    configProperties = [samedir: "${project.projectDir}/config/checkstyle"]
+    ignoreFailures = true
+    sourceSets = [sourceSets.main, sourceSets.test]
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+
+String runCommand(String str) {
+    String[] tstr = str.tokenize()
+    runCommand(tstr)
+}
+
+String runCommand(String... args) {
+    def proc = args.execute()
+    proc.waitFor()
+    proc.in.readLines().join("\n")
+}
