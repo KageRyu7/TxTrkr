@@ -127,20 +127,28 @@ components:
       properties:
         date:
           type: string
+          example: "Dec 12, 2019"
         amount:
           type: string
+          example: "−$31.93"
         balance:
           type: string
+          example: "$1,926.12"
         purchaseDate:
           type: string
+          example: "Dec 10, 2019"
         postedDate:
           type: string
+          example: "Dec 12, 2019"
         purchaseMethod:
           type: string
+          example: "card"
         type:
           type: string
+          example: "undefined"
         description:
           type: string
+          example: " ONLINE PAYMENT, THANK YOU "
     citiTransactions:
       type: object
       properties:

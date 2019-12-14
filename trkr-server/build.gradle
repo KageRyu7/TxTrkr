@@ -72,13 +72,13 @@ task swaggerClean(type: Delete) {
 clean.dependsOn(swaggerClean)
 
 swaggerSources {
-    moiraiClotho {
-        inputFile = file('src/main/swagger/openapi.yaml')
+    trksServer {
+        inputFile = file('../swagger/openapi.yaml')
         code {
             language = 'spring'
             components = ['models', 'apis']
             outputDir = file('src/generated/java')
-            configFile = file('src/main/swagger/config.json')
+            configFile = file('../swagger/config.json')
         }
         ui {
             outputDir = file('src/generated/resources/static/')
