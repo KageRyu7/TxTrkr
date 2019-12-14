@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "BankScraper",
+    "version": "0.1",
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "content_scripts": [
+        {
+          "matches": [
+            "https://online.citi.com/*/accountdetails*"
+          ],
+          "js": ["jquery-3.4.1.min.js", "citiScraper.js"]
+        }
+    ],
+    "browser_action": {
+        "default_icon": "logo.png"
+    },
+    "permissions": [
+        "tabs",
+        "activeTab"
+    ]
+}
