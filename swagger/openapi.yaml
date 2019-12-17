@@ -152,7 +152,7 @@ components:
     citiTransactions:
       type: object
       properties:
-        transactionList:
+        transactions:
           type: array
           items:
             $ref: '#/components/schemas/citiTransaction'

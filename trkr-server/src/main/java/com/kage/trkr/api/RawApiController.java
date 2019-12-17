@@ -30,7 +30,7 @@ public class RawApiController implements RawApi {
     public ResponseEntity<Object> postCitiTransactions(@ApiParam(value = "json representing the list of new citiTransactions to add." ,required=true )  @Valid @RequestBody CitiTransactions citiTransactions) {
         HttpStatus statusToReturn = HttpStatus.OK;
         String statusMessage = "success";
-        for(CitiTransaction tx: citiTransactions.getTransactionList()) {
+        for(CitiTransaction tx: citiTransactions.getTransactions()) {
             System.out.println(tx);
         }
         driver = GremlinDriverSingleton.getDriver();

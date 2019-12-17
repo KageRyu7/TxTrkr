@@ -33,7 +33,7 @@ sourceSets {
 }
 
 dependencies {
-    //spring
+      //spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation('org.springframework.boot:spring-boot-starter-data-jpa') {
@@ -70,6 +70,8 @@ task swaggerClean(type: Delete) {
     }
 }
 clean.dependsOn(swaggerClean)
+generateSwaggerCode.dependsOn(swaggerClean)
+generateSwaggerCode.mustRunAfter(swaggerClean)
 
 swaggerSources {
     trksServer {

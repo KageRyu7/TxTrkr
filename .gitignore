@@ -50,6 +50,7 @@ hs_err_pid*
 .idea/moirai-ta1-skeleton.iml
 .idea/vcs.xml
 
+.vscode/*
 
 ### macOS template
 # General
@@ -74,3 +75,8 @@ Temporary Items
 .apdisk
 .idea/
 out/
+
+*.classpath
+*.project
+*.settings
+trkr-server/bin/
